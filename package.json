@@ -1,0 +1,32 @@
+{
+  "name": "subscene-unofficial-api",
+  "version": "1.0.0",
+  "description": "An unofficial API for subscene for searching and downloading subtitles easily...",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bipuldey19/subscene-unofficial-api.git"
+  },
+  "keywords": [
+    "subscene", "subtitles", "api", "unofficial", "subtitle", "subscene-api", "subscene-unofficial-api"
+  ],
+  "author": "https://github.com/bipuldey19",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bipuldey19/subscene-unofficial-api/issues"
+  },
+  "homepage": "https://github.com/bipuldey19/subscene-unofficial-api#readme",
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "got-scraping": "^3.2.15"
+  }
+}
