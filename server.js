@@ -2,17 +2,23 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+let index = require("./routes/index");
+app.use(index);
+
 let search = require("./routes/search");
 app.use(search);
 
 let getsub = require("./routes/getsub");
 app.use(getsub);
 
-let dlsub = require("./routes/dlsub");
-app.use(dlsub);
+let sub = require("./routes/sub");
+app.use(sub);
 
-let homepage = require("./routes/homepage");
-app.use(homepage);
+let download = require("./routes/download");
+app.use(download);
+
+let extra = require("./routes/extra");
+app.use(extra);
 
 // Middleware for handling 404 errors
 app.use((req, res, next) => {

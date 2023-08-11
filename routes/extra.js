@@ -1,10 +1,10 @@
 const cheerio = require("cheerio");
-const { gotScraping } = require('got-scraping');
+const { gotScraping } = require("got-scraping");
 
 let express = require("express");
 let router = express.Router();
 
-const baseUrl = "https://subscene.com"
+const baseUrl = "https://subscene.com";
 
 router.get(["/popular", "/popular/:cat"], async (req, res) => {
   try {
@@ -20,7 +20,6 @@ router.get(["/popular", "/popular/:cat"], async (req, res) => {
       url = `${baseUrl}/browse/popular/music/1`;
     }
 
-
     const { body } = await gotScraping(url);
     const $ = cheerio.load(body);
 
@@ -31,7 +30,11 @@ router.get(["/popular", "/popular/:cat"], async (req, res) => {
       const authorLink = $(tr).find("td.a5 a");
 
       if (td.length > 0) {
-        let language = td.find("span.l.r.neutral-icon , .l.r.positive-icon, .l.r.bad-icon").text().trim() || null;
+        let language =
+          td
+            .find("span.l.r.neutral-icon , .l.r.positive-icon, .l.r.bad-icon")
+            .text()
+            .trim() || null;
         let filmTitle = td.find(".new").text().trim() || null;
         let path = td.attr("href") || null;
         let type = $(tr).find("td.a3").text().trim() || null;
@@ -46,7 +49,15 @@ router.get(["/popular", "/popular/:cat"], async (req, res) => {
           if (!results[language]) {
             results[language] = [];
           }
-          results[language].push({ path, filmTitle, type, uploaded, downloads, author, authorProfile});
+          results[language].push({
+            path,
+            filmTitle,
+            type,
+            uploaded,
+            downloads,
+            author,
+            authorProfile,
+          });
         }
       }
     });
@@ -54,7 +65,6 @@ router.get(["/popular", "/popular/:cat"], async (req, res) => {
     cleanUpResults(results);
 
     return res.json(results);
-
   } catch (err) {
     console.log(err);
     res.status(500).json("Error while fetching data");
@@ -75,7 +85,6 @@ router.get(["/latest", "/latest/:cat"], async (req, res) => {
       url = `${baseUrl}/browse/latest/music/1`;
     }
 
-
     const { body } = await gotScraping(url);
     const $ = cheerio.load(body);
 
@@ -86,7 +95,11 @@ router.get(["/latest", "/latest/:cat"], async (req, res) => {
       const authorLink = $(tr).find("td.a5 a");
 
       if (td.length > 0) {
-        let language = td.find("span.l.r.neutral-icon , .l.r.positive-icon, .l.r.bad-icon").text().trim() || null;
+        let language =
+          td
+            .find("span.l.r.neutral-icon , .l.r.positive-icon, .l.r.bad-icon")
+            .text()
+            .trim() || null;
         let filmTitle = td.find(".new").text().trim() || null;
         let path = td.attr("href") || null;
         let type = $(tr).find("td.a3").text().trim() || null;
@@ -101,7 +114,15 @@ router.get(["/latest", "/latest/:cat"], async (req, res) => {
           if (!results[language]) {
             results[language] = [];
           }
-          results[language].push({ path, filmTitle, type, uploaded, downloads, author, authorProfile});
+          results[language].push({
+            path,
+            filmTitle,
+            type,
+            uploaded,
+            downloads,
+            author,
+            authorProfile,
+          });
         }
       }
     });
@@ -109,7 +130,6 @@ router.get(["/latest", "/latest/:cat"], async (req, res) => {
     cleanUpResults(results);
 
     return res.json(results);
-
   } catch (err) {
     console.log(err);
     res.status(500).json("Error while fetching data");

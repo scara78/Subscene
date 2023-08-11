@@ -1,13 +1,13 @@
 const cheerio = require("cheerio");
-const { gotScraping } = require('got-scraping');
+const { gotScraping } = require("got-scraping");
 
 let express = require("express");
 let router = express.Router();
 
-const baseUrl = "https://subscene.com"
+const baseUrl = "https://subscene.com";
 
 router.get("/search", async (req, res) => {
-  const query = req.query.q.replace(/\s/g, "%20");
+  const query = req.query.q;
   try {
     if (!query.length) {
       throw new Error("Query Is Empty");
@@ -38,12 +38,14 @@ router.get("/search", async (req, res) => {
     });
 
     if (Object.keys(results).length === 0) {
-      return res.json({ message: "It looks like there aren't many great matches for your search" });
+      return res.json({
+        message:
+          "It looks like there aren't many great matches for your search",
+      });
     }
     cleanUpResults(results);
 
     return res.json(results);
-
   } catch (err) {
     console.log(err);
     res.status(500).json("Error while fetching data");
