@@ -49,13 +49,6 @@ router.get("/subtitles/:path", async (req, res) => {
 
       const imdbDescription =
         imdb$("p[data-testid='plot'] span:first-child").text().trim() || null;
-      const imdbYear =
-        imdb$("div h1[data-testid='hero__pageTitle']")
-          .closest("div")
-          .find("ul li:nth-child(1)")
-          .first()
-          .text()
-          .trim() || null;
       const imdbRating =
         imdb$("div[data-testid='hero-rating-bar__aggregate-rating__score']")
           .first()
@@ -93,7 +86,6 @@ router.get("/subtitles/:path", async (req, res) => {
 
       imdbInfo = {
         description: imdbDescription,
-        year: imdbYear,
         rating: imdbRating,
         runtime: imdbRuntime,
         genres: imdbGenresString,

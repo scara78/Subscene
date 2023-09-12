@@ -1,6 +1,16 @@
 const express = require("express");
+const cors = require("cors");
+const apicache = require("apicache");
+const helmet = require("helmet");
+const morgan = require("morgan");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+let cache = apicache.middleware;
+app.use(cors());
+// app.use(helmet({ poweredBy: false }));
+app.use(morgan("tiny"));
+app.use(cache("12 hours"));
 
 let index = require("./routes/index");
 app.use(index);
