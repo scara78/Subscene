@@ -16,35 +16,37 @@ router.get("/search", async (req, res) => {
     const { body } = await gotScraping(url);
     const $ = cheerio.load(body);
 
-    const results = {};
+    const results = [];
 
     $(".byTitle .search-result h2").each((i, h2) => {
+      let data = [];
+
       const ulName = $(h2).text().trim();
       const ul = $(h2).next("ul");
-
-      results[ulName] = [];
 
       ul.find("li").each((j, li) => {
         const titleDiv = $(li).find(".title");
         const path = titleDiv.find("a").attr("href");
         const title = titleDiv.find("a").text().trim();
         const count = $(li).find(".subtle.count").text().trim();
-        results[ulName].push({ path, title, count });
+        data.push({ path, title, count });
       });
 
-      if (results[ulName].length === 0) {
-        delete results[ulName];
+      if (data.length === 0) {
+        delete data;
+      }
+      results.push({ section: ulName, data });
+
+      if (data.length === 0) {
+        return res.json({
+          data:
+            "It looks like there aren't many great matches for your search",
+        });
       }
     });
 
-    if (Object.keys(results).length === 0) {
-      return res.json({
-        message:
-          "It looks like there aren't many great matches for your search",
-      });
-    }
-    cleanUpResults(results);
 
+    cleanUpResults(results);
     return res.json(results);
   } catch (err) {
     console.log(err);

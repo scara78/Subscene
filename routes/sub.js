@@ -1,4 +1,5 @@
 const cheerio = require("cheerio");
+const axios = require("axios");
 const { gotScraping } = require("got-scraping");
 
 let express = require("express");
@@ -39,6 +40,28 @@ router.get("/subtitles/:path/:lan/:id", async (req, res) => {
       null;
     // let download = $(".download a").attr("href") || null;
 
+    let imdb = $("a.imdb").attr("href") || null;
+    const parts = imdb.split("/");
+    const imdbId = parts[parts.length - 1];
+
+    let imdbData = await axios.get(
+      `https://imdb.bymirrorx.eu.org/title/${imdbId}`
+    );
+
+    let imdbInfo = {
+      imdb: imdb,
+      description: imdbData.data.plot || null,
+      poster: imdbData.data.image || null,
+      type: imdbData.data.contentType || null,
+      rating: imdbData.data.rating || null,
+      contentRating: imdbData.data.contentRating || null,
+      runtime: imdbData.data.runtime || null,
+      released: imdbData.data.releaseDetailed || null,
+      genres: imdbData.data.genre || null,
+      top_credits: imdbData.data.top_credits || null,
+      images: imdbData.data.images || null,
+    };
+
     let releaseInfo = {};
     $("li.release div").each((i, div) => {
       releaseInfo[`${i + 1}`] = $(div).text().trim();
@@ -63,6 +86,7 @@ router.get("/subtitles/:path/:lan/:id", async (req, res) => {
       downloads,
       uploadedAt,
       download,
+      imdbInfo,
       releaseInfo,
     };
     cleanUpResults(results);

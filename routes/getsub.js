@@ -31,39 +31,127 @@ router.get("/subtitles/:path", async (req, res) => {
       })
       .text()
       .trim() || null;
-
+    
     let year =
       $(".top.left .header ul li:first-child")
       .text()
       .replace("Year:", "")
       .trim() || null;
-
+    
     let poster = null;
     const posterDiv = $(".top.left .poster");
     const imgTag = posterDiv.find("img");
     if (imgTag.length > 0) {
       poster = imgTag.attr("src");
     }
-
+    
     let imdb = $("a.imdb").attr("href") || null;
     const parts = imdb.split('/');
     const imdbId = parts[parts.length - 1];
-
+    
     let imdbData = await axios.get(`https://imdb.bymirrorx.eu.org/title/${imdbId}`);
-
+    
     let imdbInfo = {
       imdb: imdb,
-      description: imdbData.data.plot,
-      poster: imdbData.data.image,
-      type: imdbData.data.contentType,
-      rating: imdbData.data.rating,
-      contentRating: imdbData.data.contentRating,
-      runtime: imdbData.data.runtime,
-      released: imdbData.data.releaseDetailed,
-      genres: imdbData.data.genre,
-      top_credits: imdbData.data.top_credits,
-      images: imdbData.data.images
+      description: imdbData.data.plot || null,
+      poster: imdbData.data.image || null,
+      type: imdbData.data.contentType || null,
+      rating: imdbData.data.rating || null,
+      contentRating: imdbData.data.contentRating || null,
+      runtime: imdbData.data.runtime || null,
+      released: imdbData.data.releaseDetailed || null,
+      genres: imdbData.data.genre || null,
+      top_credits: imdbData.data.top_credits || null,
+      images: imdbData.data.images || null,
     };
+    
+    info = {
+      title,
+      imdbInfo,
+    };
+    results["info"] = info;
+    
+    let data = [];
+    
+    $("tr:not(:first-child)").each((i, tr) => {
+      const td = $(tr).find("td.a1 a");
+      const authorLink = $(tr).find("td.a5 a");
+      const comment = $(tr).find("td.a6 div").text().trim() || null;
+    
+      if (td.length > 0) {
+        let language =
+          td
+          .find("span.l.r.neutral-icon, .l.r.positive-icon, .l.r.bad-icon")
+          .text()
+          .trim() || null;
+        let filmTitle =
+          td
+          .find(
+            "span:not(.l.r.positive-icon), span:not(.l.r.neutral-icon), span:not(.l.r.bad-icon)"
+          )
+          .text()
+          .replace(language, "")
+          .trim() || null;
+        let path = td.attr("href") || null;
+        let author = authorLink.text().trim() || null;
+        let authorProfile = baseUrl + authorLink.attr("href") || null;
+    
+        if (language !== "") {
+          let languageObj = {
+            language: language,
+            subtitles: [],
+          };
+    
+          languageObj.subtitles.push({
+            path,
+            filmTitle,
+            author,
+            authorProfile,
+            comment,
+          });
+    
+          let existingResult = data.find((result) => result.language === language);
+    
+          if (!existingResult) {
+            data.push(languageObj);
+          } else {
+            existingResult.subtitles.push({
+              path,
+              filmTitle,
+              author,
+              authorProfile,
+              comment,
+            });
+          }
+        }
+      }
+    });
+    
+    results["data"] = data;
+    
+    
+    
+    cleanUpResults(results);
+
+    return res.json(results);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json("Error while fetching data");
+  }
+});
+
+module.exports = router;
+
+function cleanUpResults(obj) {
+  for (const key in obj) {
+    if (typeof obj[key] === "string") {
+      obj[key] = obj[key].replace(/[\n\t]/g, "");
+    } else if (typeof obj[key] === "object") {
+      cleanUpResults(obj[key]);
+    }
+  }
+}
+    // MANUAL IMDB SCRAPING
 
     // if (imdb) {
     //   const imdbPage = await gotScraping(imdb);
@@ -116,71 +204,3 @@ router.get("/subtitles/:path", async (req, res) => {
     //     casts: imdbCastsString,
     //   };
     // }
-
-    info = {
-      title,
-      imdbInfo,
-    };
-    results["info"] = info;
-
-    let subtitles = {};
-
-    $("tr:not(:first-child)").each((i, tr) => {
-      const td = $(tr).find("td.a1 a");
-      const authorLink = $(tr).find("td.a5 a");
-      const comment = $(tr).find("td.a6 div").text().trim() || null;
-
-      if (td.length > 0) {
-        let language =
-          td
-          .find("span.l.r.neutral-icon, .l.r.positive-icon, .l.r.bad-icon")
-          .text()
-          .trim() || null;
-        let filmTitle =
-          td
-          .find(
-            "span:not(.l.r.positive-icon), span:not(.l.r.neutral-icon), span:not(.l.r.bad-icon)"
-          )
-          .text()
-          .replace(language, "")
-          .trim() || null;
-        let path = td.attr("href") || null;
-        let author = authorLink.text().trim() || null;
-        let authorProfile = baseUrl + authorLink.attr("href") || null;
-
-        if (language !== "") {
-          if (!subtitles[language]) {
-            subtitles[language] = [];
-          }
-          subtitles[language].push({
-            path,
-            filmTitle,
-            author,
-            authorProfile,
-            comment,
-          });
-        }
-      }
-    });
-
-    results["subtitles"] = subtitles;
-    cleanUpResults(results);
-
-    return res.json(results);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json("Error while fetching data");
-  }
-});
-
-module.exports = router;
-
-function cleanUpResults(obj) {
-  for (const key in obj) {
-    if (typeof obj[key] === "string") {
-      obj[key] = obj[key].replace(/[\n\t]/g, "");
-    } else if (typeof obj[key] === "object") {
-      cleanUpResults(obj[key]);
-    }
-  }
-}
