@@ -1,10 +1,10 @@
 const cheerio = require("cheerio");
-const { gotScraping } = require("got-scraping");
+const { gotScraping } = require('got-scraping');
 
 let express = require("express");
 let router = express.Router();
 
-const baseUrl = "https://subscene.com";
+const baseUrl = "https://subscene.com"
 
 router.get(["/popular", "/popular/:cat"], async (req, res) => {
   try {
@@ -20,6 +20,7 @@ router.get(["/popular", "/popular/:cat"], async (req, res) => {
       url = `${baseUrl}/browse/popular/music/1`;
     }
 
+
     const { body } = await gotScraping(url);
     const $ = cheerio.load(body);
 
@@ -30,60 +31,25 @@ router.get(["/popular", "/popular/:cat"], async (req, res) => {
       const authorLink = $(tr).find("td.a5 a");
 
       if (td.length > 0) {
-        let language =
-          td
-            .find("span.l.r.neutral-icon , .l.r.positive-icon, .l.r.bad-icon")
-            .text()
-            .trim() || null;
+        let lan = td.find("span.l.r.neutral-icon , .l.r.positive-icon, .l.r.bad-icon").text().trim() || null;
+        let filmTitle = td.find(".new").text().trim() || null;
+        let path = td.attr("href") || null;
+        let type = $(tr).find("td.a3").text().trim() || null;
+        let uploaded = $(tr).find("td.a6").text().trim() || null;
+        let downloads = $(tr).find("td.a7").text().trim() || null;
+        let author = authorLink.text().trim() || null;
+        let authorProfile = baseUrl + authorLink.attr("href") || null;
 
-        if (language !== "") {
-          let subtitleObj = {
-            language: language,
-            subtitles: [],
-          };
-
-          let filmTitle = td.find(".new").text().trim() || null;
-          let path = td.attr("href") || null;
-          let type = $(tr).find("td.a3").text().trim() || null;
-          let uploaded = $(tr).find("td.a6").text().trim() || null;
-          let downloads = $(tr).find("td.a7").text().trim() || null;
-          let author = authorLink.text().trim() || null;
-          let authorProfile = baseUrl + authorLink.attr("href") || null;
-
-          subtitleObj.subtitles.push({
-            path,
-            filmTitle,
-            type,
-            uploaded,
-            downloads,
-            author,
-            authorProfile,
-          });
-
-          let existingResult = results.find(
-            (result) => result.language === language
-          );
-
-          if (!existingResult) {
-            results.push(subtitleObj);
-          } else {
-            existingResult.subtitles.push({
-              path,
-              filmTitle,
-              type,
-              uploaded,
-              downloads,
-              author,
-              authorProfile,
-            });
+        if (lan !== "") {
+          results.push({ lan, path, filmTitle, type, uploaded, downloads, author, authorProfile});
           }
-        }
       }
     });
 
     cleanUpResults(results);
 
     return res.json(results);
+
   } catch (err) {
     console.log(err);
     res.status(500).json("Error while fetching data");
@@ -104,6 +70,7 @@ router.get(["/latest", "/latest/:cat"], async (req, res) => {
       url = `${baseUrl}/browse/latest/music/1`;
     }
 
+
     const { body } = await gotScraping(url);
     const $ = cheerio.load(body);
 
@@ -114,60 +81,27 @@ router.get(["/latest", "/latest/:cat"], async (req, res) => {
       const authorLink = $(tr).find("td.a5 a");
 
       if (td.length > 0) {
-        let language =
-          td
-            .find("span.l.r.neutral-icon , .l.r.positive-icon, .l.r.bad-icon")
-            .text()
-            .trim() || null;
+        let lan = td.find("span.l.r.neutral-icon , .l.r.positive-icon, .l.r.bad-icon").text().trim() || null;
+        let filmTitle = td.find(".new").text().trim() || null;
+        let path = td.attr("href") || null;
+        let type = $(tr).find("td.a3").text().trim() || null;
+        let uploaded = $(tr).find("td.a6").text().trim() || null;
+        let downloads = $(tr).find("td.a7").text().trim() || null;
+        let author = authorLink.text().trim() || null;
+        let authorProfile = baseUrl + authorLink.attr("href") || null;
 
-        if (language !== "") {
-          let subtitleObj = {
-            lan: language,
-            subtitles: [],
-          };
+        // console.log(language);
 
-          let filmTitle = td.find(".new").text().trim() || null;
-          let path = td.attr("href") || null;
-          let type = $(tr).find("td.a3").text().trim() || null;
-          let uploaded = $(tr).find("td.a6").text().trim() || null;
-          let downloads = $(tr).find("td.a7").text().trim() || null;
-          let author = authorLink.text().trim() || null;
-          let authorProfile = baseUrl + authorLink.attr("href") || null;
-
-          subtitleObj.subtitles.push({
-            path,
-            filmTitle,
-            type,
-            uploaded,
-            downloads,
-            author,
-            authorProfile,
-          });
-
-          let existingResult = results.find(
-            (result) => result.lan === language
-          );
-
-          if (!existingResult) {
-            results.push(subtitleObj);
-          } else {
-            existingResult.subtitles.push({
-              path,
-              filmTitle,
-              type,
-              uploaded,
-              downloads,
-              author,
-              authorProfile,
-            });
+        if (lan !== "") {
+          results.push({ lan, path, filmTitle, type, uploaded, downloads, author, authorProfile});
           }
-        }
       }
     });
 
     cleanUpResults(results);
 
     return res.json(results);
+
   } catch (err) {
     console.log(err);
     res.status(500).json("Error while fetching data");
