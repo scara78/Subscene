@@ -24,6 +24,26 @@ router.get("/subtitles/:path/:lan/:id", async (req, res) => {
 
     let title = $("span[itemprop='name']").text().trim() || null;
     let author = $(".author a").text().trim() || null;
+    let subtitlesDetails = {};
+    $("#details > ul > li").each((i, li) => {
+      const text = $(li).text().trim();
+
+      if (text === "---------------------------------------") {
+        return;
+      }
+
+      const parts = text.split(":");
+      if (parts.length === 2) {
+        let key = parts[0].trim();
+        let value = parts[1].trim();
+
+        if (key === "Rated") {
+          value = value.split("/")[0].trim();
+        }
+  
+        subtitlesDetails[key] = value;
+      }
+    });
     let type =
       $("#details ul li:nth-child(7)")
         .text()
@@ -81,10 +101,7 @@ router.get("/subtitles/:path/:lan/:id", async (req, res) => {
     results = {
       title,
       author,
-      type,
-      files,
-      downloads,
-      uploadedAt,
+      subtitlesDetails,
       download,
       imdbInfo,
       releaseInfo,

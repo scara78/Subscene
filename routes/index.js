@@ -14,6 +14,28 @@ router.get("/", async (req, res) => {
 
     let results = [];
 
+    async function fetchIMDbData(imdbId) {
+      try {
+        const imdbData = await axios.get(
+          `https://imdb.bymirrorx.eu.org/title/${imdbId}`
+        );
+
+        return {
+          imdb: imdbId,
+          poster: imdbData.data.image || null,
+          type: imdbData.data.contentType || null,
+          rating: imdbData.data.rating || null,
+          contentRating: imdbData.data.contentRating || null,
+          genres: imdbData.data.genre || null,
+        };
+      } catch (error) {
+        console.error("Error fetching IMDb data:", error);
+        return {};
+      }
+    }
+
+    const imdbPromises = [];
+
     $(".popular-films h1").each((i, h1) => {
       let data = [];
 
@@ -25,36 +47,48 @@ router.get("/", async (req, res) => {
         let poster = $(li).find("img").attr("src");
         let subtitles = [];
 
-        $(li)
-          .find("ul")
-          .children("li")
-          .each((k, li) => {
-            let title = $(li).find(".title > a:first-child").text().trim();
-            let name = $(li).find(".name span").text().trim();
-            let url = $(li).find(".name a").attr("href");
-            if (name.length > 0) {
-              let subtitleObj = {
-                name: name,
-                url: url,
-              };
-              subtitles.push(subtitleObj);
-            }
-            if (title.length > 0) {
-              data.push({
-                title: title,
-                path: path,
-                poster: poster,
-                subtitles: subtitles,
-              });
-            }
-          });
+        const subtitleElements = $(li).find("ul").children("li");
+        subtitleElements.each((k, subtitleLi) => {
+          let title = $(subtitleLi)
+            .find(".title > a:first-child")
+            .text()
+            .trim();
+          let name = $(subtitleLi).find(".name span").text().trim();
+          let url = $(subtitleLi).find(".name a").attr("href");
+
+          if (name.length > 0) {
+            let subtitleObj = {
+              name: name,
+              url: url,
+            };
+            subtitles.push(subtitleObj);
+          }
+          if (title.length > 0) {
+            let imdb = $(li).find("a.imdb").attr("href") || null;
+            const parts = imdb.split("/");
+            const imdbId = parts[parts.length - 1];
+            imdbPromises.push(
+              fetchIMDbData(imdbId).then((imdbInfo) => {
+                data.push({
+                  title: title,
+                  path: path,
+                  imdbInfo: imdbInfo,
+                  subtitles: subtitles,
+                });
+              })
+            );
+          }
+        });
       });
+
       let section = {
         section: ulName,
         data: data,
       };
       results.push(section);
     });
+
+    await Promise.all(imdbPromises);
 
     let recentSubtitles = [];
 
