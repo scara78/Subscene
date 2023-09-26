@@ -17,7 +17,7 @@ router.get("/subtitles/:path", async (req, res) => {
     const { body } = await gotScraping(url);
     const $ = cheerio.load(body);
 
-    let results = [];
+    let results = {};
 
     let title =
       $(".top.left .header h2")
@@ -63,13 +63,11 @@ router.get("/subtitles/:path", async (req, res) => {
       images: imdbData.data.images || null,
     };
 
-    info = {
-      title,
-      imdbInfo,
-    };
-    results.push(info);
+    results["title"] = title;
+    results["imdbInfo"] = imdbInfo;
 
-    let data = [];
+    let subtitles = [];
+
     $("tr:not(:first-child)").each((i, tr) => {
       const td = $(tr).find("td.a1 a");
       const authorLink = $(tr).find("td.a5 a");
@@ -94,7 +92,7 @@ router.get("/subtitles/:path", async (req, res) => {
         let authorProfile = baseUrl + authorLink.attr("href") || null;
 
         if (lan !== "") {
-          let subtitles = {
+          let subtitle = {
             lan,
             path,
             filmTitle,
@@ -102,11 +100,12 @@ router.get("/subtitles/:path", async (req, res) => {
             authorProfile,
             comment,
           };
-          data.push(subtitles);
+          subtitles.push(subtitle);
         }
       }
     });
-    results.push(data);
+
+    results["subtitles"] = subtitles;
 
     cleanUpResults(results);
 
@@ -128,56 +127,3 @@ function cleanUpResults(obj) {
     }
   }
 }
-// MANUAL IMDB SCRAPING
-
-// if (imdb) {
-//   const imdbPage = await gotScraping(imdb);
-//   const imdbHtml = imdbPage.body;
-//   const imdb$ = cheerio.load(imdbHtml);
-
-//   const imdbDescription =
-//     imdb$("p[data-testid='plot'] span:first-child").text().trim() || null;
-//   const imdbRating =
-//     imdb$("div[data-testid='hero-rating-bar__aggregate-rating__score']")
-//       .first()
-//       .text()
-//       .split("/")[0]
-//       .trim() || null;
-//   const imdbRuntime =
-//     imdb$("div h1[data-testid='hero__pageTitle']")
-//       .closest("div")
-//       .find("ul li:last-child")
-//       .first()
-//       .text()
-//       .trim() || null;
-//   const imdbGenres = [];
-//   imdb$("div[data-testid='genres'] div:nth-child(2) a span").each(
-//     (i, span) => {
-//       imdbGenres.push(imdb$(span).text().trim());
-//     }
-//   );
-//   const imdbGenresString = imdbGenres.join(", ").toString();
-//   const imdbDirector =
-//     imdb$(
-//       "ul.ipc-metadata-list.ipc-metadata-list--dividers-all.title-pc-list.ipc-metadata-list--baseAlt li:nth-child(1) div ul li:first-child a"
-//     )
-//       .first()
-//       .text()
-//       .trim() || null;
-//   const imdbCasts = [];
-//   imdb$(
-//     "ul.ipc-metadata-list.ipc-metadata-list--dividers-all.title-pc-list.ipc-metadata-list--baseAlt li:last-child div ul li"
-//   ).each((i, li) => {
-//     imdbCasts.push(imdb$(li).text().trim());
-//   });
-//   const imdbCastsString = imdbCasts.join(", ").toString();
-
-//   imdbInfo = {
-//     description: imdbDescription,
-//     rating: imdbRating,
-//     runtime: imdbRuntime,
-//     genres: imdbGenresString,
-//     director: imdbDirector,
-//     casts: imdbCastsString,
-//   };
-// }

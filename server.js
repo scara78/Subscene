@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 let cache = apicache.middleware;
 app.use(cors());
-// app.use(helmet({ poweredBy: false }));
+// app.use(helmet());
 app.use(morgan("tiny"));
 app.use(cache("12 hours"));
 

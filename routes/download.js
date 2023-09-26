@@ -4,7 +4,7 @@ let express = require("express");
 let router = express.Router();
 
 const baseUrl = "https://subscene.com";
-const brandName = "MirrorX";
+const brandName = "SubtitleZ.com";
 
 router.get("/download/subtitles/:lan/:id/:name", async (req, res) => {
   try {
@@ -17,8 +17,8 @@ router.get("/download/subtitles/:lan/:id/:name", async (req, res) => {
     if (!file || !file.body) throw "File Downloading Error";
 
     const name = req.params.name
-      ? brandName + "_" + decodeURIComponent(req.params.name) + ".zip"
-      : brandName + "MirrorX_Subtitle.zip";
+      ? brandName + " - " + decodeURIComponent(req.params.name) + ".zip"
+      : brandName + "_Subtitle.zip";
     const buffer = file.body;
 
     res.setHeader("Content-Disposition", `attachment; filename=${name}`);

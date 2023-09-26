@@ -24,7 +24,8 @@ router.get("/subtitles/:path/:lan/:id", async (req, res) => {
 
     let title = $("span[itemprop='name']").text().trim() || null;
     let author = $(".author a").text().trim() || null;
-    let subtitlesDetails = {};
+    let subtitlesDetails = [];
+
     $("#details > ul > li").each((i, li) => {
       const text = $(li).text().trim();
 
@@ -40,24 +41,14 @@ router.get("/subtitles/:path/:lan/:id", async (req, res) => {
         if (key === "Rated") {
           value = value.split("/")[0].trim();
         }
-  
-        subtitlesDetails[key] = value;
+
+        subtitlesDetails.push({
+          name: key,
+          value: value,
+        });
       }
     });
-    let type =
-      $("#details ul li:nth-child(7)")
-        .text()
-        .replace("Release type:", "")
-        .trim() || null;
-    let files =
-      $("#details ul li:nth-child(5)").text().replace("Files:", "").trim() ||
-      null;
-    let downloads =
-      $("#details ul li:last-child").text().replace("Downloads:", "").trim() ||
-      null;
-    let uploadedAt =
-      $("#details ul li:first-child").text().replace("Online:", "").trim() ||
-      null;
+
     // let download = $(".download a").attr("href") || null;
 
     let imdb = $("a.imdb").attr("href") || null;
@@ -91,7 +82,7 @@ router.get("/subtitles/:path/:lan/:id", async (req, res) => {
       "/download" +
         $(".download a").attr("href") +
         "/" +
-        encodeURIComponent(releaseInfo[1]) || null;
+        encodeURIComponent(releaseInfo[1].replace(/[^\w\s]/gi, "_")) || null;
     if (!download) {
       throw "Unexpected Error";
     }

@@ -45,6 +45,12 @@ router.get("/", async (req, res) => {
       ul.children("li").each((j, li) => {
         let path = $(li).find("a").attr("href");
         let poster = $(li).find("img").attr("src");
+        let noSubs = $(li)
+          .find("ul")
+          .children("li:last-child")
+          .find("nav ul li")
+          .text()
+          .trim();
         let subtitles = [];
 
         const subtitleElements = $(li).find("ul").children("li");
@@ -73,6 +79,7 @@ router.get("/", async (req, res) => {
                   title: title,
                   path: path,
                   imdbInfo: imdbInfo,
+                  noSubs: noSubs,
                   subtitles: subtitles,
                 });
               })
