@@ -59,10 +59,16 @@ router.get("/subtitles/:path/:lan/:id", async (req, res) => {
       `https://imdb.bymirrorx.eu.org/title/${imdbId}`
     );
 
+    const posterUrl = imdbData.data.image || null;
+
+    const modifiedPosterUrl = posterUrl
+      ? posterUrl.replace(/\.jpg$/, "FMjpg_UX1000_.jpg")
+      : null;
+
     let imdbInfo = {
       imdb: imdb,
       description: imdbData.data.plot || null,
-      poster: imdbData.data.image || null,
+      poster: modifiedPosterUrl,
       type: imdbData.data.contentType || null,
       rating: imdbData.data.rating || null,
       contentRating: imdbData.data.contentRating || null,
