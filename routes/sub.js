@@ -23,6 +23,12 @@ router.get("/subtitles/:path/:lan/:id", async (req, res) => {
     let results = {};
 
     let title = $("span[itemprop='name']").text().trim() || null;
+    let poster = null;
+    const posterDiv = $(".top.left .poster");
+    const imgTag = posterDiv.find("img");
+    if (imgTag.length > 0) {
+      poster = imgTag.attr("src");
+    }
     let author = $(".author a").text().trim() || null;
     let subtitlesDetails = [];
 
@@ -52,32 +58,42 @@ router.get("/subtitles/:path/:lan/:id", async (req, res) => {
     // let download = $(".download a").attr("href") || null;
 
     let imdb = $("a.imdb").attr("href") || null;
-    const parts = imdb.split("/");
-    const imdbId = parts[parts.length - 1];
+    let imdbId = null;
 
-    let imdbData = await axios.get(
-      `https://imdb.bymirrorx.eu.org/title/${imdbId}`
-    );
+    if (imdb && imdb.includes("/title/tt")) {
+      const parts = imdb.split("/");
+      imdbId = parts[parts.length - 1];
+    }
 
-    const posterUrl = imdbData.data.image || null;
+    let imdbData = null;
 
-    const modifiedPosterUrl = posterUrl
-      ? posterUrl.replace(/\.jpg$/, "FMjpg_UX1000_.jpg")
-      : null;
+    if (imdbId) {
+      imdbData = await axios.get(
+        `https://imdb.bymirrorx.eu.org/title/${imdbId}`
+      );
 
-    let imdbInfo = {
-      imdb: imdb,
-      description: imdbData.data.plot || null,
-      poster: modifiedPosterUrl,
-      type: imdbData.data.contentType || null,
-      rating: imdbData.data.rating || null,
-      contentRating: imdbData.data.contentRating || null,
-      runtime: imdbData.data.runtime || null,
-      released: imdbData.data.releaseDetailed || null,
-      genres: imdbData.data.genre || null,
-      top_credits: imdbData.data.top_credits || null,
-      images: imdbData.data.images || null,
-    };
+      const posterUrl = imdbData.data.image || null;
+
+      const modifiedPosterUrl = posterUrl
+        ? posterUrl.replace(/\.jpg$/, "FMjpg_UX1000_.jpg")
+        : null;
+
+      imdbInfo = {
+        imdb: imdb,
+        description: imdbData.data.plot || null,
+        poster: modifiedPosterUrl,
+        type: imdbData.data.contentType || null,
+        rating: imdbData.data.rating || null,
+        contentRating: imdbData.data.contentRating || null,
+        runtime: imdbData.data.runtime || null,
+        released: imdbData.data.releaseDetailed || null,
+        genres: imdbData.data.genre || null,
+        top_credits: imdbData.data.top_credits || null,
+        images: imdbData.data.images || null,
+      };
+    } else {
+      imdbInfo = null;
+    }
 
     let releaseInfo = {};
     $("li.release div").each((i, div) => {
@@ -97,6 +113,7 @@ router.get("/subtitles/:path/:lan/:id", async (req, res) => {
 
     results = {
       title,
+      poster,
       author,
       subtitlesDetails,
       download,
