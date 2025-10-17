@@ -1,4 +1,5 @@
-name = "subscene-api2"
+# wrangler.toml
+name = 'subs2'
 
 workers_dev = true
 compatibility_date = "2025-09-28"
